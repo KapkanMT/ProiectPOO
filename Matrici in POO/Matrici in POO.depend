@@ -1,4 +1,13 @@
 # depslib dependency file v1.0
-1553434354 source:d:\codeblocks\projects\matrici in poo\main.cpp
+1555417938 source:d:\codeblocks\projects\matrici in poo\main.cpp
 	<iostream>
+	"Matrici.h"
+
+1555417477 d:\codeblocks\projects\matrici in poo\include\matrici.h
+	<iostream>
+	<exception>
+	<stdexcept>
+
+1555418034 source:d:\codeblocks\projects\matrici in poo\src\matrici.cpp
+	"Matrici.h"
 

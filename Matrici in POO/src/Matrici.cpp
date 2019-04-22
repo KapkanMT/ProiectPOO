@@ -13,6 +13,14 @@ Matrici::Matrici(int lin,int col)//constructor de matrici.lin=nr de linii;col=nr
     m=new int[this->marime];
 }
 
+Matrici::Matrici()
+{
+    this->lin=0;
+    this->col=0;
+    this->marime=0;
+    m=new int[this->marime];
+}
+
 Matrici::~Matrici ()//destructor de matrici
 {
     delete[] m;
@@ -83,7 +91,10 @@ std::istream& operator >> (std::istream &in, Matrici & m)//citirea matricii
     m.marime=m.lin*m.col;
     m.m=new int[m.marime];
     for(int i=0; i<m.marime; i++)
+    {
         in>>m.m[i];
+    }
+
     return in;
 }
 
@@ -97,76 +108,49 @@ Matrici::Matrici(const Matrici &m) //constructor de copiere
         this->m[i]=m.m[i];
 }
 
-Matrici Matrici::operator+(const Matrici &m)//adunarea a 2 matrici
+Matrici Matrici::operator+(const Matrici &u)//adunarea a 2 matrici
 {
-    if(m.lin!=lin || m.col!=col)
+    if(u.lin!=lin || u.col!=col)
     {
-        std::invalid_argument e("Dimensiuni incorecte");
+        std::invalid_argument e("Dimensiuni incorecte adunare");
         throw e;
     }
     Matrici n(lin,col);
     n.lin=lin;
     n.col=col;
-    n.marime=marime;
+    n.marime=lin*col;
 
     for(int i=0;i<marime;i++)
     {
-        n[i]=m.m[i]+this->m[i];
+        n.m[i]=this->m[i]+u.m[i];
     }
     return n;
 }
 
 Matrici Matrici::operator*(const Matrici &m)//inmutirea a 2 matrici
 {
-    Matrici x(m.lin,this->col);
-    x.lin=m.lin;
-    x.col=this->col;
-    x.marime=m.lin*this->col;
-    for(int i=0;i<marime;i++)
-        for(int j=0;j<;j++)
-            x[i]=m.m[i*m.lin+j]*this->m[j*m.lin+i]+x[i];
-    //la fiecare incrementare a lui j,inmultesc al j-ulea element de pe
-    //linia primei matrici cu al j-ulea element de pe coloana celeilalte matrici
-}
+    if(this->lin != m.col)
+    {
+        std::invalid_argument e("Dimensiuni incorecte inmultire");
+        throw e;
+    }
 
-Matrici Matrici::Minor (const Matrici &m)//gasirea minorului de stanga sus
-{
-    int i,j;
-    if (m.lin<=m.col)//daca sunt mai putine linii decat coloane,se taie coloana
-    {
-        Matrici x(m.lin,m.col-1)
-        lin=m.lin;
-        col=m.col-1;
-        marime=m.marime-m.col;
-        for(i=0;i<m.lin;i++)
-            for (j=0;j<m.col-1;j++)
-                x[i*lin+j]=m.m[i*lin+j];
-        delete[] m;
-        return x;
-    }
-    if (m.lin>=m.col)//daca sunt mai putine coloane decat linii,se taie linia
-    {
-        Matrici x(m.lin-1,m.col)
-        lin=m.lin-1;
-        col=m.col;
-        marime=m.marime-m.lin;
-        for (i=0;i<marime-lin;i++)
-            x[i]=m.m[i];
-        delete[] m;
-        return x;
-    }
-    if (m.lin==m.col)//daca nr liniile si coloanele sunt egale,se taie o linie si o coloana
-    {
-        Matrici x(m.lin-1,m.col-1)
-        lin=m.lin-1;
-        col=m.col-1;
-        marime=m.marime-m.lin-m.col;
-        for(i=0;i<m.lin-1;i++)
-            for (j=0;j<m.col-1;j++)
-                x[i*lin+j]=m.m[i*lin+j];
-        delete[] m;
-        return x;
-    }
+    Matrici x(this->lin,m.col);
+    x.lin=this->lin;
+    x.col=m.col;
+    x.marime=this->lin*m.col;
+    for (int i=0;i<this->lin;i++)
+        for (int j=0;j<m.col;j++)
+        {
+            int s=0;
+            for(int k=0;k<m.col;k++)
+            {
+                s=s+this->m[i*this->col+k]*m.m[j+k*m.lin];
+            }
+            x.m[i*this->col+j]=s;
+        }
+
+    return x;
 }
 
 int Matrici::Determinant(const Matrici &m)//determinantul unei matrici cu lin==col<=3
@@ -177,13 +161,13 @@ int Matrici::Determinant(const Matrici &m)//determinantul unei matrici cu lin==c
         throw e;
     }
     if (m.lin==1)//lin==col==1
-        return m.m[1];
+        return m.m[0];
     if (m.lin==2)//lin==col==2
-        return m.m[1]*m.m[4]-m.m[2]*m.m[3]
+        return (m.m[0]*m.m[3])-(m.m[1]*m.m[2]);
     if (m.lin==3)//lin==col==3
     {
-        int deltas=m.m[1]*m.m[5]*m.m[9]+m.m[2]*m.m[6]*m.m[7]+m.m[3]*m.m[4]*m.m[8];
-        int deltad=m.m[3]*m.m[5]*m.m[7]+m.m[1]*m.m[6]*m.m[8]+m.m[2]*m.m[4]*m.m[9];
+        int deltas=m.m[0]*m.m[4]*m.m[8]+m.m[1]*m.m[5]*m.m[6]+m.m[2]*m.m[3]*m.m[7];
+        int deltad=m.m[2]*m.m[4]*m.m[6]+m.m[0]*m.m[5]*m.m[7]+m.m[1]*m.m[3]*m.m[8];
         return deltas-deltad;
     }
 }
@@ -197,8 +181,9 @@ bool Matrici::Inversabil(const Matrici &m)//inversabilitatea unei matrici
     }
     if (Determinant(m)!=0)
     {
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
     //daca e inversabila,returneaza TRUE,daca nu e,returneaza FALSE
 }
+
